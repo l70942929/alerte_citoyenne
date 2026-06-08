@@ -1,4 +1,6 @@
-from rest_framework import viewsets, permissions
+from email.mime import message
+
+from rest_framework import request, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
@@ -14,6 +16,16 @@ class MessageViewSet(viewsets.ModelViewSet):
         return Message.objects.filter(
             Q(expediteur=user) | Q(destinataire=user)
         )
+    def destroy(self, request, *args, **kwargs):
+        message = self.get_object()
+
+        if message.expediteur != request.user:
+          return Response(
+            {"erreur": "Action non autorisée"},
+            status=403
+        )
+
+        return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(expediteur=self.request.user)
