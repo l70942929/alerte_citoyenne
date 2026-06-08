@@ -1,5 +1,6 @@
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.response import Response
 from .models import Moderation
 from .serializers import ModerationSerializer
@@ -9,6 +10,8 @@ class ModerationViewSet(viewsets.ModelViewSet):
     queryset = Moderation.objects.all()
     serializer_class = ModerationSerializer
     permission_classes = [permissions.IsAuthenticated]
+    # Accepter les requêtes JSON ainsi que Form/MultiPart
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
 
     def perform_create(self, serializer):
         moderation = serializer.save(moderateur=self.request.user)

@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Signalement
@@ -20,6 +20,8 @@ class SignalementViewSet(viewsets.ModelViewSet):
     serializer_class = SignalementSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    # Autoriser aussi le JSON (application/json)
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
         serializer.save(auteur=self.request.user)
