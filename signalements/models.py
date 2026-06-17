@@ -2,78 +2,36 @@ from django.db import models
 from django.conf import settings
 
 class Signalement(models.Model):
-
     TYPE_CHOICES = [
         ('kidnapping', 'Kidnapping'),
         ('disparition', 'Disparition'),
-        ('perte_objet', "Perte d'objet"),
+        ('perte_objet', 'Perte d\'objet'),
         ('decouverte', 'Découverte'),
         ('accident', 'Accident'),
     ]
-
+    
     STATUT_CHOICES = [
         ('recu', 'Reçu'),
-        ('en_cours', 'En cours'),
+        ('en_cours', 'En cours de traitement'),
         ('resolu', 'Résolu'),
         ('cloture', 'Clôturé'),
     ]
-
-    auteur = models.ForeignKey(
+    
+    utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='signalements'
     )
-    type_alerte = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    type_alerte = models.CharField(max_length=50, choices=TYPE_CHOICES)
     description = models.TextField()
     localisation = models.CharField(max_length=255)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     date_evenement = models.DateTimeField()
     date_soumission = models.DateTimeField(auto_now_add=True)
-    photo = models.ImageField(
-        upload_to='photos/', blank=True, null=True
-    )
-    statut = models.CharField(
-        max_length=20, choices=STATUT_CHOICES, default='recu'
-    )
+    photo = models.ImageField(upload_to='photos/', null=True, blank=True)
     anonyme = models.BooleanField(default=False)
-
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='recu')
+    
     def __str__(self):
-        return f"{self.type_alerte} - {self.localisation}"
-
-    class Meta:
-        ordering = ['-date_soumission']
-        verbose_name = 'Signalement'
-        verbose_name_plural = 'Signalements'
-
-
-# ← ICI en dehors de Signalement
-class Notification(models.Model):
-
-    TYPE_CHOICES = [
-        ('push', 'Push'),
-        ('email', 'Email'),
-        ('sms', 'SMS'),
-    ]
-
-    utilisateur = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='notifications'
-    )
-    contenu = models.TextField()
-    type_notif = models.CharField(
-        max_length=10, choices=TYPE_CHOICES, default='push'
-    )
-    lu = models.BooleanField(default=False)
-    date_envoi = models.DateTimeField(auto_now_add=True)
-    signalement = models.ForeignKey(
-        Signalement,
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        related_name='notifications'
-    )
-
-    def __str__(self):
-        return f"Notif → {self.utilisateur.username}"
-
-    class Meta:
-        ordering = ['-date_envoi']
+        return f"{self.get_type_alerte_display()} - {self.localisation} - {self.utilisateur.username}"
