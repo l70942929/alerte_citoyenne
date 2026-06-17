@@ -1,4 +1,9 @@
 Django
 djangorestframework
 Pillow
-django-cors-headers 
+django-cors-headers
+drf-yasg
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
